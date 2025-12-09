@@ -16,7 +16,6 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
-      // 2. Tambahkan rute baru untuk halaman unggah
       {
         path: "/",
         element: <Home />,

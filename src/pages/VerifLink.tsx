@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams } from 'react-router-dom';
 import { FaExclamationTriangle, FaSpinner, FaPlay } from 'react-icons/fa';
 
 export const VerifLink: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const videoId = searchParams.get('v');
+  const params = useParams();
+  
+  const rawId = params.id || searchParams.get('v');
+  const videoId = rawId ? rawId.replace('.mp4', '') : null;
 
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -12,7 +15,7 @@ export const VerifLink: React.FC = () => {
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const adUrls = [
-    'https://otieu.com/4/10251220',
+    'https://agungwandev.com',
   ];
 
   const getRandomAdUrl = () => {
@@ -62,30 +65,26 @@ export const VerifLink: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-slate-900">
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-black text-white z-50">
         <div className="relative flex items-center justify-center">
-            <div className="absolute w-12 h-12 border-4 border-slate-200 rounded-full"></div>
-            <div className="w-12 h-12 border-4 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
+            <div className="absolute w-12 h-12 border-4 border-gray-600 rounded-full"></div>
+            <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
         </div>
-        <p className="mt-6 text-sm font-semibold tracking-wide text-gray-500 uppercase">Loading Preview</p>
       </div>
     );
   }
 
   if (!videoId || !videoUrl) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
-        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-black p-6 z-50">
+        <div className="bg-gray-900 p-8 rounded-2xl shadow-xl border border-gray-800 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
             <FaExclamationTriangle className="text-2xl text-red-500" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 mb-2">Video Unavailable</h1>
-          <p className="text-gray-500 mb-6 leading-relaxed">
-            The video link is invalid or the content has been removed. Please verify your URL.
-          </p>
+          <h1 className="text-2xl font-bold text-white mb-2">Video Unavailable</h1>
           <button 
             onClick={() => window.location.reload()}
-            className="w-full py-3 px-4 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 transition-colors"
+            className="w-full py-3 px-4 bg-white text-black rounded-xl font-medium hover:bg-gray-200 transition-colors mt-6"
           >
             Try Again
           </button>
@@ -95,50 +94,38 @@ export const VerifLink: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4 py-12">
-      <div className="max-w-4xl w-full flex flex-col items-center text-center space-y-8">
-        <div className="space-y-2">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
-            Ready to Watch?
-          </h1>
-          <p className="text-lg text-gray-500 max-w-lg mx-auto">
-            Click the play button below to start streaming your video in high quality.
-          </p>
-        </div>
-        
-        <div 
-            className="group relative w-full aspect-video bg-slate-900 rounded-2xl shadow-2xl shadow-slate-200 overflow-hidden cursor-pointer ring-1 ring-black/5 transform transition-all duration-300 hover:scale-[1.01]"
-            onClick={handleVideoPlay}
+    <div className="fixed inset-0 w-full h-full bg-black overflow-hidden">
+      <div 
+        className="relative w-full h-full cursor-pointer group"
+        onClick={handleVideoPlay}
+      >
+        <video
+          key={videoUrl}
+          className="absolute inset-0 w-full h-full object-cover opacity-80"
+          preload="metadata"
+          muted
+          playsInline
         >
-          {!isRedirecting && (
-            <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/10 group-hover:bg-black/20 transition-all duration-300">
-              <div className="relative flex items-center justify-center w-20 h-20 md:w-24 md:h-24 bg-white/20 backdrop-blur-md rounded-full shadow-lg border border-white/30 transition-transform duration-300 group-hover:scale-110">
-                <FaPlay className="text-3xl md:text-4xl text-white ml-2" />
-                <div className="absolute inset-0 rounded-full border border-white/50 animate-ping opacity-30"></div>
-              </div>
-            </div>
-          )}
+          <source src={videoUrl} type="video/mp4" />
+        </video>
 
-          {isRedirecting && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-slate-900/90 backdrop-blur-sm transition-all duration-500">
-              <FaSpinner className="animate-spin text-white text-4xl mb-4" />
-              <p className="text-white text-base font-medium tracking-wide">Launching Player...</p>
-            </div>
-          )}
+        <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
 
-          <video
-            key={videoUrl}
-            width="100%"
-            height="100%"
-            preload="metadata"
-            muted
-            className="w-full h-full object-cover opacity-60 mix-blend-overlay" 
-          >
-            <source src={videoUrl} type="video/mp4" />
-          </video>
-          
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
-        </div>
+        {!isRedirecting && (
+          <div className="absolute inset-0 flex items-center justify-center z-20">
+            <div className="relative flex items-center justify-center w-24 h-24 bg-white/20 backdrop-blur-md rounded-full shadow-2xl border border-white/30 transition-transform duration-300 group-hover:scale-110">
+              <FaPlay className="text-4xl text-white ml-2" />
+              <div className="absolute inset-0 rounded-full border border-white/50 animate-ping opacity-30"></div>
+            </div>
+          </div>
+        )}
+
+        {isRedirecting && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center z-30 bg-black/80 backdrop-blur-sm">
+            <FaSpinner className="animate-spin text-white text-5xl mb-4" />
+            <p className="text-white text-lg font-medium tracking-wide">Launching Player...</p>
+          </div>
+        )}
       </div>
     </div>
   );

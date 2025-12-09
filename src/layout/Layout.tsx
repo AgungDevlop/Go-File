@@ -10,7 +10,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <FaPlay className="text-sm text-white ml-0.5" />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900">
-            Tanpa Iklan <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-violet-600">Pro</span>
+            Go File <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-violet-600">Pro</span>
           </h1>
         </div>
         <a
