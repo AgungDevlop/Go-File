@@ -22,7 +22,7 @@ const router = createBrowserRouter([
       },
       {
         path: ":id",
-        element: <PlayVideo />,
+        element: <VerifLink />,
       },
       {
         path: "e/:id",
