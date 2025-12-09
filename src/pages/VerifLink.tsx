@@ -5,9 +5,33 @@ import { FaExclamationTriangle, FaSpinner, FaPlay } from 'react-icons/fa';
 export const VerifLink: React.FC = () => {
   const [searchParams] = useSearchParams();
   const params = useParams();
-  
-  const rawId = params.id || searchParams.get('v');
+
+  // LOGIKA EXTRAKSI ID YANG LEBIH KUAT
+  const getRawId = () => {
+    // 1. Coba dari React Router params
+    if (params.id) return params.id;
+    
+    // 2. Coba dari query parameter (?v=...)
+    const queryId = searchParams.get('v');
+    if (queryId) return queryId;
+
+    // 3. (PENTING) Coba ambil manual dari URL browser (fallback untuk GitHub Pages)
+    const pathSegments = window.location.pathname.split('/').filter(Boolean);
+    const lastSegment = pathSegments[pathSegments.length - 1];
+    return lastSegment || null;
+  };
+
+  const rawId = getRawId();
+  // Bersihkan ekstensi .mp4 jika ada
   const videoId = rawId ? rawId.replace('.mp4', '') : null;
+
+  // --- DEBUGGING CONSOLE ---
+  console.log("=== DEBUG VERIFLINK ===");
+  console.log("Full URL:", window.location.href);
+  console.log("Params dari Router:", params);
+  console.log("Raw ID terdeteksi:", rawId);
+  console.log("Video ID (Final):", videoId);
+  // -------------------------
 
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,23 +49,33 @@ export const VerifLink: React.FC = () => {
 
   useEffect(() => {
     if (!videoId) {
+      console.error("Video ID is NULL/Empty");
       setIsLoading(false);
       return;
     }
 
     const fetchVideoData = async () => {
       try {
+        console.log("Fetching JSON Data...");
         const response = await fetch(
           'https://raw.githubusercontent.com/AgungDevlop/Viral/refs/heads/main/Video.json'
         );
         const data = await response.json();
+        
+        // Cari video
         const video = data.find((item: { id: string }) => item.id === videoId);
+
+        console.log("Hasil Pencarian di JSON:");
+        console.log("Dicari ID:", videoId);
+        console.log("Ditemukan:", video);
 
         if (video) {
           setVideoUrl(video.Url);
+        } else {
+          console.warn("ID tidak ditemukan di dalam Video.json!");
         }
       } catch (error) {
-        console.error(error);
+        console.error("Gagal mengambil data JSON:", error);
       } finally {
         setIsLoading(false);
       }
@@ -82,9 +116,13 @@ export const VerifLink: React.FC = () => {
             <FaExclamationTriangle className="text-2xl text-red-500" />
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">Video Unavailable</h1>
+          <p className="text-gray-400 mb-4 text-sm">
+             ID: {videoId || "Not Detected"} <br/>
+             (Cek Console F12 untuk detail)
+          </p>
           <button 
             onClick={() => window.location.reload()}
-            className="w-full py-3 px-4 bg-white text-black rounded-xl font-medium hover:bg-gray-200 transition-colors mt-6"
+            className="w-full py-3 px-4 bg-white text-black rounded-xl font-medium hover:bg-gray-200 transition-colors mt-2"
           >
             Try Again
           </button>
